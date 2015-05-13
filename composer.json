@@ -1,0 +1,13 @@
+{
+    "name": "onebytegoone/estroom-monitor-server",
+    "require": {
+        "slim/slim": "~2.6"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ethan Smith",
+            "email": "ethan@onebytegone.com"
+        }
+    ]
+}
