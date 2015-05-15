@@ -5,13 +5,18 @@ require 'src/require.php';
 // Create router
 $app = new \Slim\Slim();
 
-$app->get('/', function () {
-   $data = [];
+$dataHistory = new DataHistory('data/statusdata.txt');
+
+
+$app->get('/', function () use ($dataHistory, $app) {
+   $data = $dataHistory->getItems(1)[0];
    $json = json_encode($data);
 
-   echo isset($_GET['callback'])
-      ? "{$_GET['callback']}($json)"
-      : $json;
+
+   $callback = $app->request()->get('callback');
+   $app->contentType('application/javascript');
+   echo "{$callback}($json)";
 });
+
 
 $app->run();
