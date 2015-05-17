@@ -1,7 +1,8 @@
 {
     "name": "onebytegoone/estroom-monitor-server",
     "require": {
-        "slim/slim": "~2.6"
+        "slim/slim": "~2.6",
+        "firebase/php-jwt": "~2.0"
     },
     "license": "MIT",
     "authors": [
