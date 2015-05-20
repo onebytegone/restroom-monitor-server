@@ -17,7 +17,7 @@ function outputJSONP($app, $json) {
    }
 }
 
-$app->get('/', function () use ($dataHistory, $app) {
+$app->get('/v1/status', function () use ($dataHistory, $app) {
    $data = $dataHistory->getItems(1)[0];
    $json = json_encode($data);
 

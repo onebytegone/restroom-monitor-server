@@ -7,6 +7,6 @@ This handles storing the status of the restroom.
 
 ## Endpoints
 
-### GET `/`
+### GET `/v1/status`
 
 Returns the status, voltage, and last updated time
