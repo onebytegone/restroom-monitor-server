@@ -24,4 +24,11 @@ $app->get('/v1/status', function () use ($dataHistory, $app) {
    outputJSONP($app, $json);
 });
 
+$app->get('/v1/ping', function () use ($dataHistory, $app) {
+   $data = array( "time" => time() );
+   $json = json_encode($data);
+
+   outputJSONP($app, $json);
+});
+
 $app->run();
