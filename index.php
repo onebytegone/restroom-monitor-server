@@ -31,4 +31,19 @@ $app->get('/v1/ping', function () use ($dataHistory, $app) {
    outputJSONP($app, $json);
 });
 
+$app->post('/v1/update', function () use ($dataHistory, $app) {
+   $status = "success";
+
+   try {
+      $decoded = JWT::decode($app->request()->headers('jwt'), PRIVATE_SHARED_JWT_KEY, array('HS512'));
+      //TOOD: save status
+   } catch (ExpiredException $e) {
+      $status = "failed";
+   }
+
+   $data = array( "status" => $status );
+   $json = json_encode($data);
+   outputJSONP($app, $json);
+});
+
 $app->run();
