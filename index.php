@@ -36,7 +36,10 @@ $app->post('/v1/update', function () use ($dataHistory, $app) {
 
    try {
       $decoded = JWT::decode($app->request()->headers('jwt'), PRIVATE_SHARED_JWT_KEY, array('HS512'));
-      //TOOD: save status
+
+      // Sanitize input
+      $updateTo = ($decoded->status === 'closed' ? 'closed' : 'open');
+      $dataHistory->saveItem(array('status' => $updateTo));
    } catch (ExpiredException $e) {
       $status = "failed";
    }
