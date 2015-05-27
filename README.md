@@ -16,6 +16,14 @@ cp environment.example.php environment.php
 It should be noted that `PRIVATE_SHARED_JWT_KEY` should probally be changed.
 
 
+## Unit Tests
+
+The unit tests require PHPUnit. They can be ran by calling:
+```
+util/run-tests.sh
+```
+
+
 ## Endpoints
 
 ### GET `/v1/status`
