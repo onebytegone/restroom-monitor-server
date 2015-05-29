@@ -5,7 +5,8 @@ require 'src/require.php';
 // Create router
 $app = new \Slim\Slim();
 
-$dataHistory = new DataHistory('data/statusdata.txt');
+$dataHistory = new DataHistory();
+$statusStore = new DataStore('data/statusdata.txt');
 
 function outputJSONP($app, $json) {
    $app->contentType('application/javascript');
@@ -17,21 +18,21 @@ function outputJSONP($app, $json) {
    }
 }
 
-$app->get('/v1/status', function () use ($dataHistory, $app) {
-   $data = $dataHistory->getItems(1)[0];
+$app->get('/v1/status', function () use ($dataHistory, $statusStore, $app) {
+   $data = $dataHistory->getItems($statusStore, 1)[0];
    $json = json_encode($data);
 
    outputJSONP($app, $json);
 });
 
-$app->get('/v1/ping', function () use ($dataHistory, $app) {
+$app->get('/v1/ping', function () use ($app) {
    $data = array( "time" => time() );
    $json = json_encode($data);
 
    outputJSONP($app, $json);
 });
 
-$app->post('/v1/update', function () use ($dataHistory, $app) {
+$app->post('/v1/update', function () use ($dataHistory, $statusStore, $app) {
    $status = "success";
 
    try {
@@ -39,7 +40,7 @@ $app->post('/v1/update', function () use ($dataHistory, $app) {
 
       // Sanitize input
       $updateTo = ($decoded->status === 'closed' ? 'closed' : 'open');
-      $dataHistory->saveItem(array('status' => $updateTo));
+      $dataHistory->saveItem(array('status' => $updateTo), $statusStore);
    } catch (ExpiredException $e) {
       $status = "failed";
    }
