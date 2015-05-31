@@ -10,8 +10,16 @@ class FlatFile {
 
    private $dataStore = null;
 
-   function __construct($dataStore) {
+   function __construct($dataStore, $identifierGenerator) {
       $this->dataStore = $dataStore;
    }
 
+
+   public function store($key, $value) {
+
+   }
+
+   public function mostRecent($key, &$time = 0) {
+      return "";
+   }
 }
