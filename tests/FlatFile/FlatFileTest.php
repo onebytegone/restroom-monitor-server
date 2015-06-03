@@ -35,7 +35,9 @@ class FlatFileTest extends BaseTest {
             )
          );
 
-      $flatFile = new FlatFile($mockDataStore);
+      $mockKeyGen = $this->getMock('HistoricalKeyGenerator');
+
+      $flatFile = new FlatFile($mockDataStore, $mockKeyGen);
       $mostRecent = $flatFile->mostRecent("hello", $time);
       $this->assertEquals("yo", $mostRecent);
       $this->assertEquals(3456, $time);
