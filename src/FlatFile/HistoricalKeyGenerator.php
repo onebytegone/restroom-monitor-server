@@ -8,4 +8,8 @@ class HistoricalKeyGenerator {
    public function generate($data) {
       return strval(time());
    }
+
+   public function findMostRecentKey($keys) {
+      return
+   }
 }

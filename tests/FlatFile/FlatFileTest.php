@@ -6,13 +6,13 @@
 class FlatFileTest extends BaseTest {
 
    public function testLifecycle() {
-      $mockDataStore = $this->getMock(
+      /*$mockDataStore = $this->getMock(
          'DataStore',
          array('write', 'read'),
          array('random/file/path.txt')
       );
 
-      $flatFile = new FlatFile($mockDataStore);
+      $flatFile = new FlatFile($mockDataStore);*/
    }
 
    public function testMostRecent() {
@@ -30,17 +30,24 @@ class FlatFileTest extends BaseTest {
                      "1234" => "greetings",
                      "2345" => "salutations",
                      "3456" => "yo"
-                  ),
+                  )
                )
             )
          );
 
-      $mockKeyGen = $this->getMock('HistoricalKeyGenerator');
+      $mockKeyGen = $this->getMock(
+         'HistoricalKeyGenerator',
+         array('findMostRecentKey')
+      );
+
+      $mockKeyGen->method('findMostRecentKey')
+         ->with($this->equalTo(array('1234', '2345', '3456')))
+         ->will($this->returnValue('3456'));
 
       $flatFile = new FlatFile($mockDataStore, $mockKeyGen);
       $mostRecent = $flatFile->mostRecent("hello", $time);
       $this->assertEquals("yo", $mostRecent);
-      $this->assertEquals(3456, $time);
+      $this->assertEquals("3456", $time);
    }
 
 }

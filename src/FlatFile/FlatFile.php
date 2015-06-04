@@ -29,11 +29,13 @@ class FlatFile {
       $self->dataStore->write($totalData);
    }
 
-   public function mostRecent($key, &$time = 0) {
+   public function mostRecent($key, &$historicalKey = '') {
       $data = $this->dataStore->read();
+      $items = $data[$key];
 
-      //TODO: fetch recent
+      $historicalKeys = array_keys($items);
+      $historicalKey = $this->keyGen->findMostRecentKey($historicalKeys);
 
-      return "";
+      return $items[$historicalKey];
    }
 }
