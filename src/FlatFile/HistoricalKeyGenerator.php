@@ -10,6 +10,11 @@ class HistoricalKeyGenerator {
    }
 
    public function findMostRecentKey($keys) {
-      return
+      return array_reduce($keys, function($carry, $item) {
+         $value = intval($item);
+         $compare = intval($carry);
+
+         return $value > $compare ? $item : $carry;
+      }, "0");
    }
 }
