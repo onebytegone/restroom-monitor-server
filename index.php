@@ -5,8 +5,7 @@ require 'src/require.php';
 // Create router
 $app = new \Slim\Slim();
 
-$dataHistory = new DataHistory();
-$statusStore = new DataStore('data/statusdata.txt');
+$statusStorage = new FlatFile(new DataStore('data/statusdata.json'), new HistoricalKeyGenerator());
 
 function outputJSONP($app, $json) {
    $app->contentType('application/javascript');
@@ -18,8 +17,17 @@ function outputJSONP($app, $json) {
    }
 }
 
-$app->get('/v1/status', function () use ($dataHistory, $statusStore, $app) {
-   $data = $dataHistory->getItems($statusStore, 1)[0];
+$app->get('/v1/status', function () use ($statusStorage, $app) {
+
+   $voltage = $statusStorage->mostRecent("voltage");
+   $status = $statusStorage->mostRecent("status");
+   $statusStorage->mostRecent("comm", $lastComm);
+
+   $data = array(
+      "voltage" => $voltage,
+      "status" => $status,
+      "comm" => $lastComm,
+   );
    $json = json_encode($data);
 
    outputJSONP($app, $json);
@@ -32,7 +40,7 @@ $app->get('/v1/ping', function () use ($app) {
    outputJSONP($app, $json);
 });
 
-$app->post('/v1/update', function () use ($dataHistory, $statusStore, $app) {
+$app->post('/v1/update', function () use ($statusStorage, $app) {
    $status = "success";
 
    try {
@@ -40,7 +48,10 @@ $app->post('/v1/update', function () use ($dataHistory, $statusStore, $app) {
 
       // Sanitize input
       $updateTo = ($decoded->status === 'closed' ? 'closed' : 'open');
-      $dataHistory->saveItem(array('status' => $updateTo), $statusStore);
+
+      $statusStorage->store("status", $updateTo);
+      $statusStorage->store("voltage", $decoded->voltage);
+      $statusStorage->store("comm", "updated");
    } catch (ExpiredException $e) {
       $status = "failed";
    }
