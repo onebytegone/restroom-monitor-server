@@ -20,14 +20,18 @@ class FlatFile {
    public function store($key, $value) {
       $data = $this->dataStore->read();
 
-      $newEntry = array(
-         $keyGen->generate() => $value
+      $pastEntries = isset($data[$key]) ? $data[$key] : array();
+
+      $newEntries = array(
+         $this->keyGen->generate() => $value
       );
 
-      $totalData = array_merge($data, $newEntry);
+      $allEntries = $pastEntries + $newEntries;
+      $data[$key] = $allEntries;
 
-      $self->dataStore->write($totalData);
+      $this->dataStore->write($data);
    }
+
 
    public function mostRecent($key, &$historicalKey = '') {
       $data = $this->dataStore->read();

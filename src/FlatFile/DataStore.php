@@ -81,6 +81,6 @@ class DataStore {
     * @return String - Converted data
     */
    private function deserializeData($value) {
-      return json_decode($value);
+      return json_decode($value, true);
    }
 }

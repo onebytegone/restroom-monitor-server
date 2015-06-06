@@ -5,7 +5,7 @@
  */
 
 class HistoricalKeyGenerator {
-   public function generate($data) {
+   public function generate($data = null) {
       return strval(time());
    }
 
