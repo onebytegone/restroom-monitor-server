@@ -20,13 +20,14 @@ function outputJSONP($app, $json) {
 $app->get('/v1/status', function () use ($statusStorage, $app) {
 
    $voltage = $statusStorage->mostRecent("voltage");
-   $status = $statusStorage->mostRecent("status");
+   $status = $statusStorage->mostRecent("status", $lastChange);
    $statusStorage->mostRecent("comm", $lastComm);
 
    $data = array(
       "voltage" => $voltage,
       "status" => $status,
       "comm" => $lastComm,
+      "date" => $lastChange,
    );
    $json = json_encode($data);
 
