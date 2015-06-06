@@ -80,5 +80,25 @@ class FlatFileTest extends BaseTest {
       $this->assertEquals("3456", $time);
    }
 
+   public function testFilterOldData() {
+
+      $flatFile = new FlatFile(null, null);
+      $flatFile->filterLimit = 4;
+      $filtered = $flatFile->filterOldData(array(
+         "a" => "1",
+         "b" => "2",
+         "c" => "3",
+         "d" => "4",
+         "e" => "5",
+         "f" => "6"
+      ));
+      $this->assertEquals(array(
+         "c" => "3",
+         "d" => "4",
+         "e" => "5",
+         "f" => "6"
+      ), $filtered);
+   }
+
 }
 
