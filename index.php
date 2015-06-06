@@ -49,8 +49,8 @@ $app->post('/v1/update', function () use ($statusStorage, $app) {
       // Sanitize input
       $updateTo = ($decoded->status === 'closed' ? 'closed' : 'open');
 
-      $statusStorage->store("status", $updateTo);
-      $statusStorage->store("voltage", $decoded->voltage);
+      updateIfChanged($statusStorage, "voltage", $decoded->voltage);
+      updateIfChanged($statusStorage, "status", $updateTo);
       $statusStorage->store("comm", "updated");
    } catch (ExpiredException $e) {
       $status = "failed";
@@ -62,3 +62,11 @@ $app->post('/v1/update', function () use ($statusStorage, $app) {
 });
 
 $app->run();
+
+
+function updateIfChanged($store, $key, $newValue) {
+   $lastValue = $store->mostRecent($key);
+   if ($lastValue !== $newValue) {
+      $store->store($key, $newValue);
+   }
+}
