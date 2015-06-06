@@ -5,14 +5,44 @@
  */
 class FlatFileTest extends BaseTest {
 
-   public function testLifecycle() {
-      /*$mockDataStore = $this->getMock(
+   public function testStore() {
+      $mockDataStore = $this->getMock(
          'DataStore',
          array('write', 'read'),
          array('random/file/path.txt')
       );
 
-      $flatFile = new FlatFile($mockDataStore);*/
+      $mockDataStore->method('read')
+         ->will(
+            $this->returnValue(
+               array()
+            )
+         );
+
+      $mockDataStore->method('write')
+         ->with(
+            $this->equalTo(
+               array(
+                  "hello" => array(
+                     "1234" => "yo"
+                  )
+               )
+            )
+         );
+
+
+      $mockKeyGen = $this->getMock(
+         'HistoricalKeyGenerator',
+         array('generate')
+      );
+
+      $mockKeyGen->method('generate')
+         ->will($this->returnValue('1234'));
+
+      $flatFile = new FlatFile($mockDataStore, $mockKeyGen);
+
+      $flatFile->store("hello", "yo");
+
    }
 
    public function testMostRecent() {
