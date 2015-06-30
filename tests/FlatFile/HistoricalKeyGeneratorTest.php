@@ -16,4 +16,12 @@ class HistoricalKeyGeneratorTest extends BaseTest {
          )
       ));
    }
+
+   public function testSortCompare() {
+      $gen = new HistoricalKeyGenerator();
+
+      $this->assertEquals(1, $gen->compareKeys('2', '1'));
+      $this->assertEquals(-1, $gen->compareKeys('0', '1'));
+      $this->assertEquals(0, $gen->compareKeys('1', '1'));
+   }
 }
