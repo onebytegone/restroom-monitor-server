@@ -2,6 +2,19 @@
 require 'environment.php';
 require 'src/require.php';
 
+
+class StorageName {
+   const VOLTAGE = 'voltage';
+   const STATUS = 'status';
+   const COMM = 'comm';
+
+   static $ALL_TYPES = array(
+      self::VOLTAGE,
+      self::STATUS,
+      self::COMM
+   );
+}
+
 // Create router
 $app = new \Slim\Slim();
 
@@ -19,14 +32,14 @@ function outputJSONP($app, $json) {
 
 $app->get('/v1/status', function () use ($statusStorage, $app) {
 
-   $voltage = $statusStorage->mostRecent("voltage");
-   $status = $statusStorage->mostRecent("status", $lastChange);
-   $statusStorage->mostRecent("comm", $lastComm);
+   $voltage = $statusStorage->mostRecent(StorageName::VOLTAGE);
+   $status = $statusStorage->mostRecent(StorageName::STATUS, $lastChange);
+   $statusStorage->mostRecent(StorageName::COMM, $lastComm);
 
    $data = array(
-      "voltage" => $voltage,
-      "status" => $status,
-      "comm" => $lastComm,
+      StorageName::VOLTAGE => $voltage,
+      StorageName::STATUS => $status,
+      StorageName::COMM => $lastComm,
       "date" => $lastChange,
    );
    $json = json_encode($data);
@@ -50,15 +63,30 @@ $app->post('/v1/update', function () use ($statusStorage, $app) {
       // Sanitize input
       $updateTo = ($decoded->status === 'closed' ? 'closed' : 'open');
 
-      updateIfChanged($statusStorage, "voltage", $decoded->voltage);
-      updateIfChanged($statusStorage, "status", $updateTo);
-      $statusStorage->store("comm", "updated");
+      updateIfChanged($statusStorage, StorageName::VOLTAGE, $decoded->voltage);
+      updateIfChanged($statusStorage, StorageName::STATUS, $updateTo);
+      $statusStorage->store(StorageName::COMM, "updated");
    } catch (ExpiredException $e) {
       $status = "failed";
    }
 
    $data = array( "status" => $status );
    $json = json_encode($data);
+   outputJSONP($app, $json);
+});
+
+$app->get('/v1/history/raw/:type/(:limit)', function ($type, $limit = 9999) use ($statusStorage, $app) {
+   $type = strtolower($type);
+   if (!in_array($type, StorageName::$ALL_TYPES)) {
+      $app->response()->status(404);
+      return;
+   }
+
+   $limit = intval($limit);
+
+   $status = $statusStorage->getEntrySet($type, $limit);
+   $json = json_encode($status);
+
    outputJSONP($app, $json);
 });
 

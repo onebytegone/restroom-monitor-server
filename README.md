@@ -30,6 +30,15 @@ util/run-tests.sh
 
 Returns the status, voltage, and last updated time
 
+### GET `/v1/history/raw/:type/(:limit)`
+
+**Segments:**
+
+  * `type` The type of data to return. Possible values: `status`, `comm`, and `voltage`
+  * `limit` The max number of items to return
+
+This provides access to the raw log information
+
 
 ## Sections for project
 * [Web Client](https://github.com/onebytegone/restroom-monitor-web)
