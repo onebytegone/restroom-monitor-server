@@ -80,6 +80,55 @@ class FlatFileTest extends BaseTest {
       $this->assertEquals("3456", $time);
    }
 
+   public function testGetEntrySet() {
+      $mockDataStore = $this->getMock(
+         'DataStore',
+         array('write', 'read'),
+         array('random/file/path.txt')
+      );
+
+      $mockDataStore->method('read')
+         ->will(
+            $this->returnValue(
+               array(
+                  "hello" => array(
+                     "1234" => "greetings",
+                     "2345" => "salutations",
+                     "3456" => "yo"
+                  )
+               )
+            )
+         );
+
+      $mockKeyGen = $this->getMock(
+         'HistoricalKeyGenerator',
+         array('compareKey')
+      );
+
+      $mockKeyGen->method('findMostRecentKey')
+         ->will($this->returnValue(1));
+
+      $flatFile = new FlatFile($mockDataStore, $mockKeyGen);
+
+      $entrySet = $flatFile->getEntrySet("hello");
+      $this->assertEquals(array(
+         "1234" => "greetings",
+         "2345" => "salutations",
+         "3456" => "yo"
+      ), $entrySet);
+
+      $entrySet = $flatFile->getEntrySet("hello", 2);
+      $this->assertEquals(array(
+         "2345" => "salutations",
+         "3456" => "yo"
+      ), $entrySet);
+
+      $entrySet = $flatFile->getEntrySet("hello", 1);
+      $this->assertEquals(array(
+         "3456" => "yo"
+      ), $entrySet);
+   }
+
    public function testFilterOldData() {
 
       $flatFile = new FlatFile(null, null);

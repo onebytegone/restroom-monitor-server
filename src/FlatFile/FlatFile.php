@@ -11,6 +11,7 @@ class FlatFile {
    private $dataStore = null;
    private $keyGen = null;
    public $filterLimit = 400;
+   public $maxHistoryLookup = 400;
 
    function __construct($dataStore, $keyGen) {
       $this->dataStore = $dataStore;
@@ -44,6 +45,26 @@ class FlatFile {
 
       return $items[$historicalKey];
    }
+
+
+   public function getEntrySet($key, $limit = -1) {
+      // Cap the amount we will return
+      if ($limit <= 0) {
+         $limit = $this->maxHistoryLookup;
+      }
+
+      $data = $this->dataStore->read();
+      $items = $data[$key];
+
+      $historicalKeys = array_keys($items);
+      usort($historicalKeys, array($this->keyGen, 'compareKeys'));
+
+      $wantedKeys = array_slice($historicalKeys, -$limit);
+      $filtered = array_intersect_key($items, array_flip($wantedKeys));
+
+      return $filtered;
+   }
+
 
    public function filterOldData($entries) {
       return count($entries) > $this->filterLimit ? array_slice($entries, -$this->filterLimit, null, true) : $entries;
