@@ -166,13 +166,22 @@ $app->get('/v1/history/stats', function () use ($statusStorage, $app) {
    }, $rawPopularity);
 
    $popularity = array_combine(array('sun', 'mon', 'tues', 'wed', 'thur', 'fri', 'sat'), $popularity);
+   $avgPerDay = array_sum($rawPopularity)/count($rawPopularity);
+
+   $hoursDivided = $analyzer->divideRangesIntoHours($filteredRanges);
+   $hourCounts = array_map(function ($data) {
+      return count($data);
+   }, $hoursDivided);
+   $avgPerHour = array_sum($hourCounts)/count($hourCounts);
 
    $stats = array(
       'totalLength' => $timeUsed,
       'totalCount' => count($filteredRanges),
       'averageTime' => $timeUsed / count($filteredRanges),
       'popularity' => $popularity,
-      'rawPopularity' => $rawPopularity
+      'rawPopularity' => $rawPopularity,
+      'avgPerHour' => $avgPerHour,
+      'avgPerDay' => $avgPerDay
    );
 
    $json = json_encode($stats);
