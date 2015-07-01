@@ -39,11 +39,41 @@ class DataAnalyzer {
    }
 
    public function divideRangesIntoHours($ranges) {
-      return array_reduce($ranges, function($carry, $range) {
-         $hour = intval(date('H', $range['start']));
+      return $this->divideByTimeSection($ranges, 'H', array_fill(0, 24, array()));
+   }
+
+   public function divideRangesIntoDays($ranges) {
+      return $this->divideByTimeSection($ranges, 'w', array_fill(0, 7, array()));
+   }
+
+   public function divideByTimeSection($ranges, $tag, $preload) {
+      return array_reduce($ranges, function($carry, $range) use ($tag) {
+         $hour = intval(date($tag, $range['start']));
          $carry[$hour][] = $range;
 
          return $carry;
-      }, array_fill(0, 24, array()));
+      }, $preload);
+   }
+
+   public function allDaysFoundForRanges($ranges) {
+      return array_unique(array_map(function ($range) {
+            return date('Y/m/d', $range['start']);
+      }, $ranges));
+   }
+
+   public function timeUsedInRanges($ranges) {
+      return array_reduce($ranges, function ($carry, $range) {
+         return $carry + $range['length'];
+      });
+   }
+
+   public function mapToRange($value, $oldMin, $oldMax, $newMin, $newMax) {
+      $oldRange = $oldMax - $oldMin;
+      if ($oldRange == 0) {
+         return $newMin;
+      }
+
+      $newRange = $newMax - $newMin;
+      return ((($value - $oldMin) * $newRange) / $oldRange) + $newMin;
    }
 }

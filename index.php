@@ -101,19 +101,14 @@ $app->get('/v1/history/day', function () use ($statusStorage, $app) {
    $hourDivided = $analyzer->divideRangesIntoHours($filteredRanges);
 
    // calculate hour stat info
-   $hourStats = array_map(function ($hourRanges) {
+   $hourStats = array_map(function ($hourRanges) use($analyzer) {
       $percent = 0;
       $timeUsed = 0;
       $secondsTracked = 0;
       $pointCount = count($hourRanges);
       if ($pointCount > 0) {
-         $allDays = array_unique(array_map(function ($range) {
-            return date('Y/m/d', $range['start']);
-         }, $hourRanges));
-
-         $timeUsed = array_reduce($hourRanges, function ($carry, $range) {
-            return $carry + $range['length'];
-         });
+         $allDays = $analyzer->allDaysFoundForRanges($hourRanges);
+         $timeUsed = $analyzer->timeUsedInRanges($hourRanges);
 
          // days * 1 hour * 60 min * 60 sec
          $secondsTracked = ( count($allDays) * 60 * 60 );
@@ -129,6 +124,45 @@ $app->get('/v1/history/day', function () use ($statusStorage, $app) {
    }, $hourDivided);
 
    $json = json_encode($hourStats);
+
+   outputJSONP($app, $json);
+});
+
+$app->get('/v1/history/stats', function () use ($statusStorage, $app) {
+   $statusSet = $statusStorage->getEntrySet(StorageName::STATUS);
+   $keyGen = $statusStorage->keyGenerator();
+
+   $analyzer = new DataAnalyzer();
+
+   $usedRanges = $analyzer->convertEntrySetToRanges($statusSet, array($keyGen, 'timestampFromKey'));
+   $filteredRanges = $analyzer->filterUnexpectedRanges($usedRanges);
+
+   $timeUsed = $analyzer->timeUsedInRanges($filteredRanges);
+
+   $dayDivided = $analyzer->divideRangesIntoDays($filteredRanges);
+
+   $rawPopularity = array_map(function ($dayData) {
+      return count($dayData);
+   }, $dayDivided);
+
+   $minUsed = min($rawPopularity);
+   $maxUsed = max($rawPopularity);
+
+   $popularity = array_map(function ($countForDay) use ($minUsed, $maxUsed, $analyzer) {
+      return $analyzer->mapToRange($countForDay, $minUsed, $maxUsed, 0, 10);
+   }, $rawPopularity);
+
+   $popularity = array_combine(array('sun', 'mon', 'tues', 'wed', 'thur', 'fri', 'sat'), $popularity);
+
+   $stats = array(
+      'totalLength' => $timeUsed,
+      'totalCount' => count($filteredRanges),
+      'averageTime' => $timeUsed / count($filteredRanges),
+      'popularity' => $popularity,
+      'rawPopularity' => $rawPopularity
+   );
+
+   $json = json_encode($stats);
 
    outputJSONP($app, $json);
 });
