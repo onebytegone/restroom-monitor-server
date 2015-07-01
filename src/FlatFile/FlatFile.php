@@ -10,8 +10,8 @@ class FlatFile {
 
    private $dataStore = null;
    private $keyGen = null;
-   public $filterLimit = 600;
-   public $maxHistoryLookup = 600;
+   public $filterLimit = 2000;
+   public $maxHistoryLookup = 2000;
 
    function __construct($dataStore, $keyGen) {
       $this->dataStore = $dataStore;
