@@ -39,7 +39,15 @@ class DataAnalyzer {
    }
 
    public function divideRangesIntoHours($ranges) {
-      return $this->divideByTimeSection($ranges, 'H', array_fill(0, 24, array()));
+      $hoursDivided = $this->divideByTimeSection($ranges, 'H', array_fill(0, 24, array()));
+
+      $mapped = array_reduce(array_keys($hoursDivided), function($carry, $hour) use ($hoursDivided) {
+         $key = date('ga', strtotime("{$hour}:00"));
+         $carry[$key] = $hoursDivided[$hour];
+         return $carry;
+      });
+
+      return $mapped;
    }
 
    public function divideRangesIntoDays($ranges) {
