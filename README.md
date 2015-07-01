@@ -82,6 +82,10 @@ Returns the per hour of the day stats. This is date agnositc, it only cares abou
 }
 ```
 
+### GET `/v1/history/ranges/(:limit)`
+
+Returns the start and length for each time used.
+
 
 ## Sections for project
 * [Web Client](https://github.com/onebytegone/restroom-monitor-web)

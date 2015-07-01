@@ -90,6 +90,19 @@ $app->get('/v1/history/raw/:type/(:limit)', function ($type, $limit = 9999) use 
    outputJSONP($app, $json);
 });
 
+$app->get('/v1/history/ranges(/:limit)', function ($limit = 9999) use ($statusStorage, $app) {
+   $statusSet = $statusStorage->getEntrySet(StorageName::STATUS, $limit);
+   $keyGen = $statusStorage->keyGenerator();
+
+   $analyzer = new DataAnalyzer();
+
+   $usedRanges = $analyzer->convertEntrySetToRanges($statusSet, array($keyGen, 'timestampFromKey'));
+
+   $json = json_encode($usedRanges);
+
+   outputJSONP($app, $json);
+});
+
 $app->get('/v1/history/day', function () use ($statusStorage, $app) {
    $statusSet = $statusStorage->getEntrySet(StorageName::STATUS);
    $keyGen = $statusStorage->keyGenerator();
