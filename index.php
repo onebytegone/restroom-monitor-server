@@ -94,44 +94,11 @@ $app->get('/v1/history/day', function () use ($statusStorage, $app) {
    $statusSet = $statusStorage->getEntrySet(StorageName::STATUS);
    $keyGen = $statusStorage->keyGenerator();
 
-   $usedRanges = array_reduce(array_keys($statusSet), function($carry, $key) use ($statusSet, $keyGen) {
-      $lastRange = end($carry);
-      if (count($carry) == 0 || $lastRange['length'] != -1) {
-         if ($statusSet[$key] == 'closed') {
-            $carry[] = array(
-               'start' => $keyGen->timestampFromKey($key),
-               'length' => -1
-            );
-         }
-      } else if ($lastRange['length'] == -1) {
-         if ($statusSet[$key] == 'open') {
-            $range = array_pop($carry);
-            $range['length'] = $keyGen->timestampFromKey($key) - $range['start'];
-            $carry[] = $range;
-         }
-      }
+   $analyzer = new DataAnalyzer();
 
-      return $carry;
-   }, array());
-
-   // filter the too short and too long ranges
-   $filteredRanges = array_values(array_filter(array_map(function($range) {
-      // Discard those shorter than 10sec and longer than 25 min
-      if ($range['length'] < 10 || $range['length'] > 25 * 60) {
-         return null;
-      }
-      return $range;
-   }, $usedRanges)));
-
-
-   // split into hours
-   $hourDivided = array_reduce($filteredRanges, function($carry, $range) {
-      $hour = intval(date('H', $range['start']));
-      $carry[$hour][] = $range;
-
-      return $carry;
-   }, array_fill(0, 24, array()));
-
+   $usedRanges = $analyzer->convertEntrySetToRanges($statusSet, array($keyGen, 'timestampFromKey'));
+   $filteredRanges = $analyzer->filterUnexpectedRanges($usedRanges);
+   $hourDivided = $analyzer->divideRangesIntoHours($filteredRanges);
 
    // calculate hour stat info
    $hourStats = array_map(function ($hourRanges) {
