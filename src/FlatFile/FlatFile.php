@@ -69,4 +69,8 @@ class FlatFile {
    public function filterOldData($entries) {
       return count($entries) > $this->filterLimit ? array_slice($entries, -$this->filterLimit, null, true) : $entries;
    }
+
+   public function keyGenerator() {
+      return $this->keyGen;
+   }
 }

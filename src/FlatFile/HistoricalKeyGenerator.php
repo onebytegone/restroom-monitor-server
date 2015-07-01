@@ -18,13 +18,17 @@ class HistoricalKeyGenerator {
    }
 
    public function compareKeys($a, $b) {
-      $aValue = intval($a);
-      $bValue = intval($b);
+      $aValue = $this->timestampFromKey($a);
+      $bValue = $this->timestampFromKey($b);
 
       if ($a == $b) {
          return 0;
       }
 
       return $a > $b ? 1 : -1;
+   }
+
+   public function timestampFromKey($key) {
+      return intval($key);
    }
 }
