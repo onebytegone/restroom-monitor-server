@@ -152,7 +152,17 @@ $app->get('/v1/history/stats', function () use ($statusStorage, $app) {
 
    $timeUsed = $analyzer->timeUsedInRanges($filteredRanges);
 
-   $dayDivided = $analyzer->divideRangesIntoDays($filteredRanges);
+
+   $twoWeekStamp = strtotime("-2 week");
+   $lastTwoWeeks = array_filter(array_map(function ($range) use ($twoWeekStamp) {
+      if ($range['start'] < $twoWeekStamp) {
+         return null;
+      }
+
+      return $range;
+   }, $filteredRanges));
+
+   $dayDivided = $analyzer->divideRangesIntoDays($lastTwoWeeks);
 
    $rawPopularity = array_map(function ($dayData) {
       return count($dayData);
